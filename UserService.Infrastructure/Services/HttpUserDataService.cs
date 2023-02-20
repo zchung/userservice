@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Polly;
 using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
 using UserService.Domain.Models.Constants;
@@ -26,8 +27,17 @@ namespace UserService.Infrastructure.Services
 
                 var httpClient = _httpClientFactory.CreateClient();
 
-                var json = await httpClient.GetStringAsync(usersDataUrl, cancellationToken);
+                var pollyResult = await Policy.Handle<HttpRequestException>()
+                    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                    .ExecuteAndCaptureAsync(() => httpClient.GetStringAsync(usersDataUrl, cancellationToken));
 
+                if (pollyResult.Outcome != OutcomeType.Successful)
+                {
+                    // log exception
+                    return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.RetryErrorHttpRequest });
+                }
+
+                var json = pollyResult.Result;
                 var users = JsonConvert.DeserializeObject<IEnumerable<User>>(json);
 
                 if (users == null)
