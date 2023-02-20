@@ -14,7 +14,7 @@ namespace UserService.Extensions
             services.AddTransient<IConfigurationService, NetCoreConfigurationService>();
             services.AddHttpClient();
             services.RegisterInfrastructure();
-
+            services.AddLogging();
             services.SetupApplication();
 
             return services;

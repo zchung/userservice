@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Polly;
 using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
@@ -12,11 +13,13 @@ namespace UserService.Infrastructure.Services
     {
         private readonly IConfigurationService _configurationService;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<HttpUserDataService> _logger;
 
-        public HttpUserDataService(IConfigurationService configurationService, IHttpClientFactory httpClientFactory)
+        public HttpUserDataService(IConfigurationService configurationService, IHttpClientFactory httpClientFactory, ILogger<HttpUserDataService> logger)
         {
             _configurationService = configurationService;
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         public async Task<IResponse<IEnumerable<IUser>>> Get(CancellationToken cancellationToken)
@@ -33,7 +36,8 @@ namespace UserService.Infrastructure.Services
 
                 if (pollyResult.Outcome != OutcomeType.Successful)
                 {
-                    // log exception
+                    EventId eventId = new EventId(1, "HttpRequestException");
+                    _logger.LogError(eventId, pollyResult.FinalException, MessageConstants.RetryErrorHttpRequest);
                     return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.RetryErrorHttpRequest });
                 }
 
@@ -49,7 +53,8 @@ namespace UserService.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                // log exception
+                EventId eventId = new EventId(2, "Exception");
+                _logger.LogError(eventId, ex, MessageConstants.ErrorGettingUsersHttpRequest);
                 return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.ErrorGettingUsersHttpRequest });
             }
         }
