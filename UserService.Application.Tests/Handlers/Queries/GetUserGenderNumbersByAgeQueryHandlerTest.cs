@@ -7,6 +7,7 @@ using UserService.Application.Handlers.Queries;
 using UserService.Application.Tests.Handlers.Queries.Helpers;
 using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
+using UserService.Domain.Responses;
 
 namespace UserService.Application.Tests.Handlers.Queries
 {
@@ -30,7 +31,7 @@ namespace UserService.Application.Tests.Handlers.Queries
             // Arrange
             IEnumerable<IUser> testUsers = TestDataHelper.GetTestUsers();
 
-            _userDataService.Get(Arg.Any<CancellationToken>()).Returns(testUsers);
+            _userDataService.Get(Arg.Any<CancellationToken>()).Returns(Response<IEnumerable<IUser>>.GetSuccessResponse(testUsers));
 
             string expectedResult = "Age: 23 Female: 1 Male: 1,Age: 54 Female: 0 Male: 1,Age: 66 Female: 1 Male: 2";
 

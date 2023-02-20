@@ -21,7 +21,7 @@ namespace UserService.Application.Handlers.Queries
         public async Task<IResponse<IEnumerable<IUser>>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
             // TODO: error handling
-            return Response<IEnumerable<IUser>>.GetSuccessResponse(await _userDataService.Get(cancellationToken));
+            return Response<IEnumerable<IUser>>.GetSuccessResponse((await _userDataService.Get(cancellationToken)).Data);
         }
     }
 }

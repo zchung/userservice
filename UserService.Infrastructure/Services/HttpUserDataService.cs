@@ -3,6 +3,7 @@ using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
 using UserService.Domain.Models.Constants;
 using UserService.Domain.Providers;
+using UserService.Domain.Responses;
 
 namespace UserService.Infrastructure.Services
 {
@@ -17,19 +18,30 @@ namespace UserService.Infrastructure.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<IEnumerable<IUser>> Get(CancellationToken cancellationToken)
+        public async Task<IResponse<IEnumerable<IUser>>> Get(CancellationToken cancellationToken)
         {
-            // TODO: add polly
-            // TODO: add caching
-            var usersDataUrl = await _configurationService.GetValue<string>(SettingsConstants.USERS_DATA_URL_KEY, SettingsConstants.USERS_DATA_URL_DEFAULT);
+            try
+            {
+                var usersDataUrl = await _configurationService.GetValue<string>(SettingsConstants.USERS_DATA_URL_KEY, SettingsConstants.USERS_DATA_URL_DEFAULT);
 
-            var httpClient = _httpClientFactory.CreateClient();
+                var httpClient = _httpClientFactory.CreateClient();
 
-            var json = await httpClient.GetStringAsync(usersDataUrl, cancellationToken);
+                var json = await httpClient.GetStringAsync(usersDataUrl, cancellationToken);
 
-            var users = JsonConvert.DeserializeObject<IEnumerable<User>>(json);
+                var users = JsonConvert.DeserializeObject<IEnumerable<User>>(json);
 
-            return users;
+                if (users == null)
+                {
+                    return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.NullUsersHttpRequest });
+                }
+
+                return Response<IEnumerable<IUser>>.GetSuccessResponse(users);
+            }
+            catch (Exception ex)
+            {
+                // log exception
+                return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.ErrorGettingUsersHttpRequest });
+            }
         }
     }
 }

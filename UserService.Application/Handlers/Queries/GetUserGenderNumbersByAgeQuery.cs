@@ -21,9 +21,13 @@ namespace UserService.Application.Handlers.Queries
 
         public async Task<IResponse<IEnumerable<IUserGenderNumberData>>> Handle(GetUserGenderNumbersByAgeQuery request, CancellationToken cancellationToken)
         {
-            var users = await _userDataService.Get(cancellationToken);
+            var usersResponse = await _userDataService.Get(cancellationToken);
+            if (!usersResponse.Success)
+            {
+                return Response<IEnumerable<IUserGenderNumberData>>.GetFailedResponse(usersResponse.Messages);
+            }
 
-            var groupedUsers = users
+            var groupedUsers = usersResponse.Data
                 .GroupBy(g => g.Age)
                 .OrderBy(o => o.Key)
                 .Select(s => new UserGenderNumberData

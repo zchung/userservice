@@ -26,9 +26,13 @@ namespace UserService.Application.Handlers.Queries
 
         public async Task<IResponse<IUser>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
-            var users = await _userDataService.Get(cancellationToken);
+            var usersResponse = await _userDataService.Get(cancellationToken);
+            if (!usersResponse.Success)
+            {
+                return Response<IUser>.GetFailedResponse(usersResponse.Messages);
+            }
 
-            var filteredUser = users.FirstOrDefault(u => u.Id == request.Id);
+            var filteredUser = usersResponse.Data.FirstOrDefault(u => u.Id == request.Id);
 
             return filteredUser != null ?
                 Response<IUser>.GetSuccessResponse(filteredUser) :

@@ -26,8 +26,12 @@ namespace UserService.Application.Handlers.Queries
 
         public async Task<IResponse<IEnumerable<IUser>>> Handle(GetUsersByAgeQuery request, CancellationToken cancellationToken)
         {
-            var users = await _userDataService.Get(cancellationToken);
-            var result = users.Where(u => u.Age == request.Age).OrderBy(o => o.Last);
+            var usersResponse = await _userDataService.Get(cancellationToken);
+            if (!usersResponse.Success)
+            {
+                return usersResponse;
+            }
+            var result = usersResponse.Data.Where(u => u.Age == request.Age).OrderBy(o => o.Last);
 
             return result.Any() ?
                 Response<IEnumerable<IUser>>.GetSuccessResponse(result) :
