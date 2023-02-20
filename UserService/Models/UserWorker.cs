@@ -21,39 +21,59 @@ internal class UserWorker
         response.Result.WriteToConsole();
     }
 
-    public void GetUserFullNameById(int id)
+    public void WriteUserFullNameById(int id)
     {
         Task<IResponse<IUser>> response = Task.Run(() => _mediator.Send(new GetUserByIdQuery(id)));
         var result = response.Result;
-        Console.WriteLine($"Result for id: {id} - {nameof(GetUserFullNameById)}:");
+        Console.WriteLine($"Result for id: {id} - {nameof(WriteUserFullNameById)}:");
         if (result.Success)
         {
             Console.WriteLine(result.Data.FullName);
         }
         else
         {
-            foreach (var message in result.Messages)
-            {
-                Console.WriteLine(message);
-            }
+            WriteMessagesToConsole(result.Messages);
         }
     }
 
-    public void GetUsersByAge(int age)
+    public void WriteUsersByAge(int age)
     {
         Task<IResponse<IEnumerable<IUser>>> response = Task.Run(() => _mediator.Send(new GetUsersByAgeQuery(age)));
         var result = response.Result;
-        Console.WriteLine($"Result for age: {age} - {nameof(GetUsersByAge)}:");
+        Console.WriteLine($"Result for age: {age} - {nameof(WriteUsersByAge)}:");
         if (result.Success)
         {
             Console.WriteLine(result.Data.Select(s => s.FullName).ToJoinedString());
         }
         else
         {
-            foreach (var message in result.Messages)
+            WriteMessagesToConsole(result.Messages);
+        }
+    }
+
+    public void WriteUserGenderNumbersByAge()
+    {
+        Task<IResponse<IEnumerable<IUserGenderNumberData>>> response = Task.Run(async () => await _mediator.Send(new GetUserGenderNumbersByAgeQuery()));
+        var result = response.Result;
+        Console.WriteLine($"Result for {nameof(WriteUserGenderNumbersByAge)}:");
+        if (result.Success)
+        {
+            foreach (var data in result.Data)
             {
-                Console.WriteLine(message);
+                Console.WriteLine(data.ToString());
             }
+        }
+        else
+        {
+            WriteMessagesToConsole(result.Messages);
+        }
+    }
+
+    private void WriteMessagesToConsole(List<string> messages)
+    {
+        foreach (var message in messages)
+        {
+            Console.WriteLine(message);
         }
     }
 }
