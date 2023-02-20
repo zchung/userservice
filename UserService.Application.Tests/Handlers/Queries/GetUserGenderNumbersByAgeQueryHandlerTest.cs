@@ -5,8 +5,8 @@ using NSubstitute;
 using UserService.Application.Extensions;
 using UserService.Application.Handlers.Queries;
 using UserService.Application.Tests.Handlers.Queries.Helpers;
+using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
-using UserService.Infrastructure.Services.Interfaces;
 
 namespace UserService.Application.Tests.Handlers.Queries
 {

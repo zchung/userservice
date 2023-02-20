@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using UserService.Domain.Interfaces;
 using UserService.Infrastructure.Services;
-using UserService.Infrastructure.Services.Interfaces;
 
 namespace UserService.Infrastructure.Extensions
 {

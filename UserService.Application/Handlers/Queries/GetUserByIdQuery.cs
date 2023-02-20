@@ -1,7 +1,7 @@
 ﻿using MediatR;
+using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
 using UserService.Domain.Responses;
-using UserService.Infrastructure.Services.Interfaces;
 
 namespace UserService.Application.Handlers.Queries
 {

@@ -1,6 +1,6 @@
 ﻿using UserService.Domain.Models;
 
-namespace UserService.Infrastructure.Services.Interfaces
+namespace UserService.Domain.Interfaces
 {
     public interface IUserDataService
     {

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
+using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
 using UserService.Domain.Models.Constants;
 using UserService.Domain.Providers;
-using UserService.Infrastructure.Services.Interfaces;
 
 namespace UserService.Infrastructure.Services
 {
