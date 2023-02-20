@@ -13,7 +13,8 @@ internal class Program
         using IServiceScope serviceScope = host.Services.CreateScope();
         IServiceProvider provider = serviceScope.ServiceProvider;
         var workerInstance = provider.GetRequiredService<UserWorker>();
-        workerInstance.GetAllUsers();
+        workerInstance.GetUserFullNameById(41);
+        workerInstance.GetUsersByAge(24);
 
         host.Run();
     }
