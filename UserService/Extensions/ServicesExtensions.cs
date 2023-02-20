@@ -10,7 +10,7 @@ namespace UserService.Extensions
     {
         public static IServiceCollection RegisterServices(this IServiceCollection services)
         {
-            services.AddSingleton<Worker>();
+            services.AddSingleton<UserWorker>();
             services.AddTransient<IConfigurationService, NetCoreConfigurationService>();
             services.AddHttpClient();
             services.RegisterInfrastructure();
