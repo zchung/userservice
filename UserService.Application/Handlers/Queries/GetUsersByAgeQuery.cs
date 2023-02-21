@@ -9,10 +9,14 @@ namespace UserService.Application.Handlers.Queries
     public class GetUsersByAgeQuery : IRequest<IResponse<IEnumerable<IUser>>>
     {
         public int Age { get; }
+        public int? PageSize { get; set; }
+        public int? PageNumber { get; set; }
 
-        public GetUsersByAgeQuery(int age)
+        public GetUsersByAgeQuery(int age, int? pageSize = null, int? pageNumber = null)
         {
             Age = age;
+            PageSize = pageSize;
+            PageNumber = pageNumber;
         }
     }
 
@@ -32,7 +36,15 @@ namespace UserService.Application.Handlers.Queries
             {
                 return usersResponse;
             }
-            var result = usersResponse.Data.Where(u => u.Age == request.Age).OrderBy(o => o.Last);
+            var result = usersResponse.Data.Where(u => u.Age == request.Age).OrderBy(o => o.Last).AsEnumerable();
+
+            if (request.PageNumber.HasValue &&
+                request.PageNumber.Value > 0 &&
+                request.PageSize.HasValue &&
+                request.PageSize.Value > 0)
+            {
+                result = result.Skip(request.PageNumber.Value - 1).Take(request.PageSize.Value);
+            }
 
             return result.Any() ?
                 Response<IEnumerable<IUser>>.GetSuccessResponse(result) :

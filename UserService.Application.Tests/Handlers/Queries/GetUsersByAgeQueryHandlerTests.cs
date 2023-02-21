@@ -59,5 +59,26 @@ namespace UserService.Application.Tests.Handlers.Queries
             result.Messages.Should().NotBeEmpty();
             result.Messages.First().Should().Be(MessageConstants.NoUsersFound);
         }
+
+        [TestMethod]
+        public async Task Handle_Should_Page_A_User_List_Correctly()
+        {
+            // Arrange
+            IEnumerable<User> testUsers = _fixture
+                .Build<User>()
+                .With(w => w.Age, 23)
+                .CreateMany(1000).ToList();
+            int pageSize = 10;
+            _userDataService.Get(Arg.Any<CancellationToken>()).Returns(Response<IEnumerable<IUser>>.GetSuccessResponse(testUsers));
+
+            // Act
+            var result = await _sut.Handle(new GetUsersByAgeQuery(23, pageSize, 1), CancellationToken.None);
+
+            result.Should().NotBeNull();
+            result.Success.Should().BeTrue();
+            result.Data.Should()
+                .NotBeEmpty().And
+                .HaveCount(pageSize);
+        }
     }
 }
