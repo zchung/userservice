@@ -38,6 +38,18 @@ namespace UserService.Application.Handlers.Queries
             return filteredUser != null ?
                 Response<IUser>.GetSuccessResponse(filteredUser) :
                 Response<IUser>.GetFailedResponse(new List<string> { MessageConstants.NoUserByThatId });
+
+            // if the sample data was using unique ids this would be more efficient to search the list.
+            //var userDictionary = usersResponse.Data.ToDictionary(d => d.Id); // convert to dictionary for improved performance
+
+            //if (userDictionary.TryGetValue(request.Id, out IUser filteredUser))
+            //{
+            //    return Response<IUser>.GetSuccessResponse(filteredUser);
+            //}
+            //else
+            //{
+            //    return Response<IUser>.GetFailedResponse(new List<string> { MessageConstants.NoUserByThatId });
+            //}
         }
     }
 }
