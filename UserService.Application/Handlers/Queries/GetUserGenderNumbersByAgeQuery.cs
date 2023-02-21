@@ -8,6 +8,15 @@ namespace UserService.Application.Handlers.Queries
 {
     public class GetUserGenderNumbersByAgeQuery : IRequest<IResponse<IEnumerable<IUserGenderNumberData>>>
     {
+        public int? PageSize { get; set; }
+
+        public int? PageNumber { get; set; }
+
+        public GetUserGenderNumbersByAgeQuery(int? pageSize = null, int? pageNumber = null)
+        {
+            PageSize = pageSize;
+            PageNumber = pageNumber;
+        }
     }
 
     public class GetUserGenderNumbersByAgeQueryHandler : IRequestHandler<GetUserGenderNumbersByAgeQuery, IResponse<IEnumerable<IUserGenderNumberData>>>
@@ -27,6 +36,11 @@ namespace UserService.Application.Handlers.Queries
                 return Response<IEnumerable<IUserGenderNumberData>>.GetFailedResponse(usersResponse.Messages);
             }
 
+            if (!usersResponse.Data.Any())
+            {
+                return Response<IEnumerable<IUserGenderNumberData>>.GetFailedResponse(new List<string> { MessageConstants.NoUsersFound });
+            }
+
             var groupedUsers = usersResponse.Data
                 .GroupBy(g => g.Age)
                 .OrderBy(o => o.Key)
@@ -37,9 +51,12 @@ namespace UserService.Application.Handlers.Queries
                     s.Count(c => c.Gender == UserConstants.Male)
                 ));
 
-            if (!groupedUsers.Any())
+            if (request.PageNumber.HasValue &&
+                request.PageNumber.Value > 0 &&
+                request.PageSize.HasValue &&
+                request.PageSize.Value > 0)
             {
-                return Response<IEnumerable<IUserGenderNumberData>>.GetFailedResponse(new List<string> { MessageConstants.NoUsersFound });
+                groupedUsers = groupedUsers.Skip(request.PageNumber.Value - 1).Take(request.PageSize.Value);
             }
 
             return Response<IEnumerable<IUserGenderNumberData>>.GetSuccessResponse(groupedUsers);

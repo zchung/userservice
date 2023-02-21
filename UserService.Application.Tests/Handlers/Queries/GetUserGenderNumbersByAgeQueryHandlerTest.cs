@@ -58,5 +58,45 @@ namespace UserService.Application.Tests.Handlers.Queries
             result.Messages.Should().NotBeEmpty();
             result.Messages.First().Should().Be(MessageConstants.NoUsersFound);
         }
+
+        [TestMethod]
+        public async Task Handle_Should_Return_Correctly_Paged_List()
+        {
+            // Arrange
+            Random random = new Random();
+            int agesCount = 15;
+            var ages = _fixture.CreateMany<int>(agesCount).ToList();
+            var genders = new List<string> { "M", "F" };
+            IEnumerable<User> testUsers = _fixture
+                .Build<User>()
+                .With(w => w.Age, () => GetRandomAge(random, ages))
+                .With(x => x.Gender, () => GetRandomGender(random, genders))
+                .CreateMany(1000);
+            int pageSize = 10;
+
+            _userDataService.Get(Arg.Any<CancellationToken>()).Returns(Response<IEnumerable<IUser>>.GetSuccessResponse(testUsers));
+
+            var response = await _sut.Handle(new GetUserGenderNumbersByAgeQuery(pageSize, 1), CancellationToken.None);
+
+            response.Should().NotBeNull();
+            response.Success.Should().BeTrue();
+            response.Data.Should()
+                .NotBeEmpty().And
+                .HaveCount(pageSize);
+        }
+
+        private int GetRandomAge(Random random, List<int> list)
+        {
+            var index = random.Next(0, list.Count);
+
+            return list[index];
+        }
+
+        private string GetRandomGender(Random random, List<string> list)
+        {
+            var index = random.Next(0, list.Count);
+
+            return list[index];
+        }
     }
 }
