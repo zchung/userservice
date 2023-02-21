@@ -11,7 +11,7 @@ namespace UserService.Extensions
         public static IServiceCollection RegisterServices(this IServiceCollection services)
         {
             services.AddTransient<UserWorker>();
-            services.AddTransient<IConfigurationService, NetCoreConfigurationService>();
+            services.AddSingleton<IConfigurationService, NetCoreConfigurationService>();
             services.AddHttpClient();
             services.RegisterInfrastructure();
             services.AddLogging();
