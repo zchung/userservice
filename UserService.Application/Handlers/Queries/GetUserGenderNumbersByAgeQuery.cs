@@ -37,6 +37,11 @@ namespace UserService.Application.Handlers.Queries
                     s.Count(c => c.Gender == UserConstants.Male)
                 ));
 
+            if (!groupedUsers.Any())
+            {
+                return Response<IEnumerable<IUserGenderNumberData>>.GetFailedResponse(new List<string> { MessageConstants.NoUsersFound });
+            }
+
             return Response<IEnumerable<IUserGenderNumberData>>.GetSuccessResponse(groupedUsers);
         }
     }

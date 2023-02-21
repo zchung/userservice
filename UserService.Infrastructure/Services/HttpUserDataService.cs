@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Polly;
 using UserService.Domain.Interfaces;
@@ -14,12 +15,14 @@ namespace UserService.Infrastructure.Services
         private readonly IConfigurationService _configurationService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<HttpUserDataService> _logger;
+        private readonly IDistributedCache _cache;
 
-        public HttpUserDataService(IConfigurationService configurationService, IHttpClientFactory httpClientFactory, ILogger<HttpUserDataService> logger)
+        public HttpUserDataService(IConfigurationService configurationService, IHttpClientFactory httpClientFactory, ILogger<HttpUserDataService> logger, IDistributedCache cache)
         {
             _configurationService = configurationService;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _cache = cache;
         }
 
         public async Task<IResponse<IEnumerable<IUser>>> Get(CancellationToken cancellationToken)
@@ -33,16 +36,26 @@ namespace UserService.Infrastructure.Services
                 var pollyResult = await Policy.Handle<HttpRequestException>()
                     .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                     .ExecuteAndCaptureAsync(() => httpClient.GetStringAsync(usersDataUrl, cancellationToken));
-
+                string json = string.Empty;
                 if (pollyResult.Outcome != OutcomeType.Successful)
                 {
                     EventId eventId = new EventId(1, "HttpRequestException");
                     _logger.LogError(eventId, pollyResult.FinalException, MessageConstants.RetryErrorHttpRequest);
-                    return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.RetryErrorHttpRequest });
-                }
+                    // try to get last cached data
+                    json = await _cache.GetStringAsync(CacheConstants.USER_DATA_KEY, cancellationToken);
 
-                var json = pollyResult.Result;
+                    if (string.IsNullOrWhiteSpace(json))
+                    {
+                        return Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.RetryErrorHttpRequest });
+                    }
+                }
+                else
+                {
+                    json = pollyResult.Result;
+                }
                 var users = JsonConvert.DeserializeObject<IEnumerable<User>>(json);
+
+                await _cache.SetStringAsync(CacheConstants.USER_DATA_KEY, json, cancellationToken);
 
                 if (users == null)
                 {

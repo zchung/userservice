@@ -6,6 +6,7 @@ using UserService.Application.Handlers.Queries;
 using UserService.Application.Tests.Handlers.Queries.Helpers;
 using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
+using UserService.Domain.Models.Constants;
 using UserService.Domain.Responses;
 
 namespace UserService.Application.Tests.Handlers.Queries
@@ -38,9 +39,23 @@ namespace UserService.Application.Tests.Handlers.Queries
             var result = await _sut.Handle(new GetUserByIdQuery(id), CancellationToken.None);
 
             result.Should().NotBeNull();
+            result.Success.Should().BeTrue();
             result.Data.Should().NotBeNull();
             result.Data.Id.Should().Be(id);
             result.Data.FullName.Should().Be(expectedFullName);
+        }
+
+        [TestMethod]
+        public async Task Handle_Should_Return_Error_If_No_User()
+        {
+            _userDataService.Get(Arg.Any<CancellationToken>()).Returns(Response<IEnumerable<IUser>>.GetSuccessResponse(Enumerable.Empty<IUser>()));
+
+            var result = await _sut.Handle(new GetUserByIdQuery(1), CancellationToken.None);
+
+            result.Should().NotBeNull();
+            result.Success.Should().BeFalse();
+            result.Messages.Should().NotBeEmpty();
+            result.Messages.First().Should().Be(MessageConstants.NoUserByThatId);
         }
     }
 }

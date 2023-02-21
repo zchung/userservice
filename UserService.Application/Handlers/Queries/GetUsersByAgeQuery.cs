@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
+using UserService.Domain.Models.Constants;
 using UserService.Domain.Responses;
 
 namespace UserService.Application.Handlers.Queries
@@ -35,7 +36,7 @@ namespace UserService.Application.Handlers.Queries
 
             return result.Any() ?
                 Response<IEnumerable<IUser>>.GetSuccessResponse(result) :
-                Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { "No users found." });
+                Response<IEnumerable<IUser>>.GetFailedResponse(new List<string> { MessageConstants.NoUsersFound });
         }
     }
 }

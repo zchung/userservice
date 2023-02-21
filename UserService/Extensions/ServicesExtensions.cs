@@ -16,6 +16,7 @@ namespace UserService.Extensions
             services.RegisterInfrastructure();
             services.AddLogging();
             services.SetupApplication();
+            services.AddDistributedMemoryCache();
 
             return services;
         }

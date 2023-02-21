@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using UserService.Domain.Interfaces;
 using UserService.Domain.Models;
+using UserService.Domain.Models.Constants;
 using UserService.Domain.Responses;
 
 namespace UserService.Application.Handlers.Queries
@@ -36,7 +37,7 @@ namespace UserService.Application.Handlers.Queries
 
             return filteredUser != null ?
                 Response<IUser>.GetSuccessResponse(filteredUser) :
-                Response<IUser>.GetFailedResponse(new List<string> { "No user by that Id" });
+                Response<IUser>.GetFailedResponse(new List<string> { MessageConstants.NoUserByThatId });
         }
     }
 }

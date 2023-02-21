@@ -13,7 +13,7 @@ internal class Program
         using IServiceScope serviceScope = host.Services.CreateScope();
         IServiceProvider provider = serviceScope.ServiceProvider;
         var workerInstance = provider.GetRequiredService<UserWorker>();
-        workerInstance.WriteUserFullNameById(41);
+        workerInstance.WriteUserFullNameById(42);
         workerInstance.WriteUsersByAge(23);
         workerInstance.WriteUserGenderNumbersByAge();
 
